@@ -11,6 +11,7 @@
 	
 	<!-- we may want to pull these out into a properties file eventually -->
 	<property name="src.dir" value="src"/>
+	<property name="dist.dir" value="dist"/>
 	<property name="build.dir" value="bin"/>
 	<property name="lib.dir" value="lib"/>
 	<property name="doc.dir" value="doc"/>
@@ -18,6 +19,8 @@
 	<property name="swtmodel.jar" value="${lib.dir}/${swtmodel.jar.name}"/>
 	<property name="swtripper.jar.name" value="swtripper.jar"/>
 	<property name="swtripper.jar" value="${lib.dir}/${swtripper.jar.name}"/>
+	<property name="swtrippertest.jar.name" value="swtrippertest.jar"/>
+	<property name="swtrippertest.jar" value="${dist.dir}/${swtrippertest.jar.name}"/>
 	<property name="junit.dir" value="${lib.dir}/junit-4.8.2"/>
 	<property name="junit.jar" value="${junit.dir}/junit.jar"/>
 	<property name="junit.out" value="testresults"/>
@@ -42,7 +45,7 @@
 	</path>
 	<taskdef classpathref="cobertura.classpath" resource="tasks.properties"/> 
 	
-	<!-- Use correct swt jar depending on operating system and JVM architecture -->
+	<!-- Use correct swt jar depending on operating system -->
 	<condition property="swt.jar" value="swt-linux.jar">
 		<and>
 		    <os family="unix"/>
@@ -54,17 +57,10 @@
 	<condition property="swt.jar" value="swt-mac.jar">
 		<os family="mac"/>
 	</condition>
-	<condition property="swt.jar" value="swt-windows-x86-64.jar">
-		<and>
-			<os family="windows"/>
-			<!-- this checks JVM architecture, which is all we care about anyway -->
-			<os arch="amd64"/>
-		</and>
-	</condition>
 	<condition property="swt.jar" value="swt-windows.jar">
 		<os family="windows"/>
 	</condition>
-			
+		
     <path id="SWTRipperTest.classpath">
     	<!-- TODO can we just specify everything in lib but swt? -->
         <pathelement location="${build.dir}"/>
@@ -84,8 +80,6 @@
     </path>
     
     <target name="init">
-    	<echo message="Using SWT jar ${swt.jar}"/>
-    	
         <mkdir dir="${build.dir}"/>
         <copy includeemptydirs="false" todir="${build.dir}">
             <fileset dir="${src.dir}">
@@ -94,6 +88,13 @@
             </fileset>
         </copy>
     </target>
+	
+	<target name="dist" depends="build" description="Build a JAR of this project">
+		<mkdir dir="${dist.dir}"/>
+		<jar destfile="${swtrippertest.jar}">
+			<fileset dir="${build.dir}"/>
+		</jar>
+	</target>
 	
 	<target name="doc" description="Generate Javadocs">
 		<mkdir dir="${doc.dir}"/>
@@ -202,6 +203,7 @@
 				
 	<target name="clean">
         <delete dir="${build.dir}"/>
+		<delete dir="${dist.dir}"/>
 		<delete dir="${doc.dir}"/>
 		<delete dir="${junit.out}"/>
 		<delete dir="${coverage.dir}"/>
